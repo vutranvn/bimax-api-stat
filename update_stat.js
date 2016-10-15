@@ -9,6 +9,7 @@ var server = restify.createServer({
     version: '1.0.0'
 });
 
+var port = 8003;
 var winston = require('winston');
 winston.level = 'debug';
 winston.add(winston.transports.File, { filename: '/var/log/app.log' });
@@ -41,5 +42,6 @@ server.get('/api/v2/stat', function (req, res, next) {
 
 })
 
-server.listen(8002, function () {
+server.listen(port, function () {
+    console.log("listen port " + port);
 });
