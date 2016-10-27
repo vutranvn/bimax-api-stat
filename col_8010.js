@@ -293,7 +293,7 @@ server.get('/api/v1/update', function (req, res, next) {
         curdate = moment().subtract(2, 'minute');
 //    var units = ['minute', 'hour', 'day', 'month', 'year'];
     if(!units || _.isEmpty(units))
-        units = ['minute', 'hour'];
+        units = ['minute', 'hour', 'day', 'month', 'year'];
     updateAll(names, names, units, curdate, function(){
         res.end('done');
     });
