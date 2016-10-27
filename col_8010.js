@@ -100,31 +100,33 @@ function calcUnit(names, unit, curdate, nameData, callback){
                }
               )
 }
-function calcSpeed(namefull, curUnitFormat, prefix, callback){
+function calcSpeed(namefull, curUnitFormat, callback){
     var nameArr = namefull.split('|');
     //console.log("nameArr:" + nameArr.length);
-    var name;
+    var name, prefix;
     if(nameArr.length < 2) {
         callback(); return;
     }
-    else
+    else {
         name = nameArr[1];
+        prefix = nameArr[0];
+    }
 //    console.log("calcSpeed:" + name + " curUnitFormat:" + curUnitFormat);
     //    console.log('calSpeed name:' + name + ' curUnitFormat:' + curUnitFormat);
     async.parallel(
         [
             function(cb){
-                rclient.hmget(prefix + 'speed_request|' + name, curUnitFormat, function(err, val){
+                rclient.hmget(namefull, curUnitFormat, function(err, val){
                     cb(null, {name:'speed', val: val});
                 })
             },
             function(cb){
-                rclient.hmget(prefix + 'request_count_2xx|' + name, curUnitFormat, function(err, val){
+                rclient.hmget(prefix.replace('speed_request','request_count_2xx'), curUnitFormat, function(err, val){
                     cb(null, {name: '2xx', val: val});
                 })
             },
             function(cb){
-                rclient.hmget(prefix + 'body_bytes_sent|' + name, curUnitFormat, function(err, val){
+                rclient.hmget(prefix.replace('speed_request','body_bytes_sent'), curUnitFormat, function(err, val){
                     cb(null, {name: 'body', val: val});
                 })
             }
@@ -141,13 +143,13 @@ function calcSpeed(namefull, curUnitFormat, prefix, callback){
             async.parallel([
                 function(cb){
                     //console.log("hmset:avg_speed " + name + " curUnitFormat:" + curUnitFormat + " " + avg_speed);
-                    rclient.hmset(prefix + 'avg_speed|' + name, curUnitFormat, avg_speed, function(){
+                    rclient.hmset(prefix.replace('speed_request','avg_speed'), curUnitFormat, avg_speed, function(){
                         cb();
                     });
                 },
                 function(cb){
                     //console.log("hmset:traffic_ps " + name + " curUnitFormat:" + curUnitFormat + " " + traffic_ps);
-                     rclient.hmset(prefix + 'traffic_ps|' + name, curUnitFormat, traffic_ps, function(){
+                    rclient.hmset(prefix.replace('speed_request','traffic_ps'), curUnitFormat, traffic_ps, function(){
                         cb();
                      });
                 }
@@ -163,23 +165,10 @@ function calcExtendMetric(names, unit, curdate, callback){
     async.each(
         names,
         function(name, cb){
-            async.parallel([
-                function(cb1){
-                    if(unit == 'minute') {cb1(); return}
-                    calcSpeed(name, curUnitFormat, "", function(){
-                        cb1();
-                    });
-                },
-                function(cb1){
-                    if(unit == 'minute') {cb1(); return}
-                    calcSpeed(name, curUnitFormat, "isp_", function(){
-                        cb1();
-                    });
-                }
-            ], function(){
+            if(unit != 'minute') {cb(); return};
+            calcSpeed(name, curUnitFormat, function(){
                 cb();
-            })
-
+            });
         },
         function(){
             callback();
@@ -246,7 +235,7 @@ function updateAll(mynames, myexnames, units, curdate, callback){
                         cb();
                     });
                 } else {
-                    getAllNames("speed_request|*", function(names){
+                    getAllNames("*speed_request*", function(names){
                         myexnames = names;
                         calcExtendMetric(myexnames, unit, curdate, function(){
                             cb();
