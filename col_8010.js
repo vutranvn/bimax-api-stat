@@ -103,13 +103,12 @@ function calcUnit(names, unit, curdate, nameData, callback){
 function calcSpeed(namefull, curUnitFormat, callback){
     var nameArr = namefull.split('|');
     //console.log("nameArr:" + nameArr.length);
-    var name, prefix;
+    var name;
     if(nameArr.length < 2) {
         callback(); return;
     }
     else {
         name = nameArr[1];
-        prefix = nameArr[0];
     }
 //    console.log("calcSpeed:" + name + " curUnitFormat:" + curUnitFormat);
     //    console.log('calSpeed name:' + name + ' curUnitFormat:' + curUnitFormat);
@@ -121,12 +120,12 @@ function calcSpeed(namefull, curUnitFormat, callback){
                 })
             },
             function(cb){
-                rclient.hmget(prefix.replace('speed_request','request_count_2xx'), curUnitFormat, function(err, val){
+                rclient.hmget(namefull.replace('speed_request','request_count_2xx'), curUnitFormat, function(err, val){
                     cb(null, {name: '2xx', val: val});
                 })
             },
             function(cb){
-                rclient.hmget(prefix.replace('speed_request','body_bytes_sent'), curUnitFormat, function(err, val){
+                rclient.hmget(namefull.replace('speed_request','body_bytes_sent'), curUnitFormat, function(err, val){
                     cb(null, {name: 'body', val: val});
                 })
             }
@@ -143,13 +142,13 @@ function calcSpeed(namefull, curUnitFormat, callback){
             async.parallel([
                 function(cb){
                     //console.log("hmset:avg_speed " + name + " curUnitFormat:" + curUnitFormat + " " + avg_speed);
-                    rclient.hmset(prefix.replace('speed_request','avg_speed'), curUnitFormat, avg_speed, function(){
+                    rclient.hmset(namefull.replace('speed_request','avg_speed'), curUnitFormat, avg_speed, function(){
                         cb();
                     });
                 },
                 function(cb){
                     //console.log("hmset:traffic_ps " + name + " curUnitFormat:" + curUnitFormat + " " + traffic_ps);
-                    rclient.hmset(prefix.replace('speed_request','traffic_ps'), curUnitFormat, traffic_ps, function(){
+                    rclient.hmset(namefull.replace('speed_request','traffic_ps'), curUnitFormat, traffic_ps, function(){
                         cb();
                      });
                 }
