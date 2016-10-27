@@ -300,53 +300,6 @@ server.get('/api/v1/update', function (req, res, next) {
         res.end('done');
     });
 });
-
-// server.get('/api/v1/update_custom', function (req, res, next) {
-//     var params = req.params;
-//     var unit = params['unit'];
-//     var date = params['date'];
-//     if(!unit || !date) {res.end("fail"); return;}
-//     var esc = params['esc'];
-//     var units = [];
-//     var units_default = ['hour', 'day', 'month', 'year'];
-//     if(esc == "true") {
-//         var found = false;
-//         units = _.filter(units_default, function(u){
-//             if(u === unit) found = true;
-//             return found;
-//         })
-//     } else {
-//         units.push(unit);
-//     }
-//     var curdate = moment(date);
-//     console.log('unit:' + unit);
-//     console.log('esc:' + esc);
-//     console.log('curdate:' + curdate.toString());
-//     console.log('units:'); console.log(units);
-//     // async.series(
-//     //     [
-//     //         function(cb){
-//     //             getAllNames("speed_request|*", function(names){
-//     //                 calcExtendMetric(names, curdate, function(){
-//     //                     cb();
-//     //                 });
-//     //             })
-//     //         },
-//     //         function(cb){
-//     //             getAllNames("*", function(names){
-//     //                 calc(names, units, curdate, function(results){
-//     //                     cb();
-//     //                 });
-//     //             });
-//     //         }
-//     //     ],
-//     //     function(err){
-//     //         res.end('done');
-//     //     }
-//     // )
-//     res.end('done');
-// });
-
 server.listen(port, "127.0.0.1", function () {
     console.log("listen port " + port);
 });
