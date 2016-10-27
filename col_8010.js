@@ -165,14 +165,16 @@ function calcExtendMetric(names, unit, curdate, callback){
         function(name, cb){
             async.parallel([
                 function(cb1){
+                    if(unit == 'minute') {cb1(); return}
                     calcSpeed(name, curUnitFormat, "", function(){
                         cb1();
-                    });              
+                    });
                 },
                 function(cb1){
+                    if(unit == 'minute') {cb1(); return}
                     calcSpeed(name, curUnitFormat, "isp_", function(){
                         cb1();
-                    });                    
+                    });
                 }
             ], function(){
                 cb();
