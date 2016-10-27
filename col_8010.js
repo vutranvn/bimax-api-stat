@@ -1,19 +1,19 @@
 var restify = require('restify');
 var redis = require('redis');
 var moment = require('moment');
-var when = require('when');
+//var when = require('when');     
 var async = require('async');
 var _ = require('underscore');
 var server = restify.createServer({
     name: 'myapp',
     version: '1.0.0'
 });
-var LRUCache = require('lru-native');
-var cache = new LRUCache({maxElements: 1000});
+// var LRUCache = require('lru-native');
+// var cache = new LRUCache({maxElements: 1000});
 var port = 8010;
-var winston = require('winston');
-winston.level = 'debug';
-winston.add(winston.transports.File, {filename: '/var/log/app.log'});
+// var winston = require('winston');
+// winston.level = 'debug';
+// winston.add(winston.transports.File, {filename: '/var/log/app.log'});
 
 var rclient = redis.createClient(
     "/tmp/redis_counters.sock"
