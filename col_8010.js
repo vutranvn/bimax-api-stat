@@ -101,7 +101,7 @@ function calcUnit(names, unit, curdate, nameData, callback){
               )
 }
 function calcSpeed(namefull, curUnitFormat, callback){
-    console.log("calcSpeed:" + namefull);
+//    console.log("calcSpeed:" + namefull);
     var nameArr = namefull.split('|');
     //console.log("nameArr:" + nameArr.length);
     var name;
@@ -121,13 +121,12 @@ function calcSpeed(namefull, curUnitFormat, callback){
                 })
             },
             function(cb){
-                console.log(namefull.replace('speed_request','request_count_2xx'));
+//                console.log(namefull.replace('speed_request','request_count_2xx'));
                 rclient.hmget(namefull.replace('speed_request','request_count_2xx'), curUnitFormat, function(err, val){
                     cb(null, {name: '2xx', val: val});
                 })
             },
             function(cb){
-                namefull.replace('speed_request','body_bytes_sent')
                 rclient.hmget(namefull.replace('speed_request','body_bytes_sent'), curUnitFormat, function(err, val){
                     cb(null, {name: 'body', val: val});
                 })
