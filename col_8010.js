@@ -89,7 +89,7 @@ function calcUnit(names, unit, curdate, nameData, callback){
 				                       n = n + 1;
 			                     }
                        });
-		                   if(/avg_speed/.test(name)) s = s / n;
+		                   if(/avg_speed/.test(name)) s = (n == 0) ? 0: s / n;
                        if(!nameData[name]) nameData[name] = {};
                        nameData[name][curUnitFormat] = s;
                        cb();
