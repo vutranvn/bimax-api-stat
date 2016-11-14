@@ -301,7 +301,8 @@ server.get('/api/v1/stat', function (req, res, next) {
 	if(type_avg_speed) {
 		acc_type = 'max';
 	}
-	var domain = [];
+	var domain 	= [];
+	var tmp 	= [];
 	async.map(keys_arr, function(key_each, type_callback){
 		domain.push(key_each);
 		async.map(type_arr, function(type, callback){
@@ -335,6 +336,10 @@ server.get('/api/v1/stat', function (req, res, next) {
 			})
 		}, function(err, result){
 			// callback of sub-async
+			// winston.log("debug", "key_each:", key_each);
+			// winston.log("debug", "totali:", totali);
+			tmp.push(key_each);
+			tmp.push(totali);
 			if(type_avg_speed) {
 				var t1 ,t2;
 				var result1 = [];
@@ -384,8 +389,10 @@ server.get('/api/v1/stat', function (req, res, next) {
 		}, function(type_err, type_result){
 			// callback function of master-async
 			var final_result = _.flatten(type_result);
-			winston.log("debug", "final_result: ", final_result);
-			winston.log("debug", "domain: ", domain);
+			// winston.log("debug", "final_result: ", type_result);
+			// winston.log("debug", "domain: ", domain);
+			// winston.log("debug", "totali: ", totali);
+			// winston.log("debug", "totaltmp: ", tmp);
 			var ddata = {};
 			var t1 = {}, t2 = {};
 			Object.keys(final_result).forEach(function(kl1){
