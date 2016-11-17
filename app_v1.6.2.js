@@ -266,6 +266,7 @@ server.get('/api/v1/stat', function (req, res, next) {
 
 	var total 	= [];
 	var totali 	= {};
+	var totalOfTotali = [];
 
 	var type_arr = [];
 	var type_avg_speed 	= false;
@@ -290,7 +291,6 @@ server.get('/api/v1/stat', function (req, res, next) {
 		async.map(type_arr, function(type, callback){
 			// iteratee function of sub-async
 			var key = type + '|' + key_each;
-			var dddataa = [];
 			redis_get(rclient, key, keys, keys_origin, keys_origink, unit_type, acc_type, function(err, data){
 				if(err) {
 					callback(err); return;
@@ -309,6 +309,7 @@ server.get('/api/v1/stat', function (req, res, next) {
 			})
 		}, function(err, result){
 			// callback of sub-async
+			totalOfTotali.push({name: key_each, value: [totali]});
 			if(type_avg_speed) {
 				var t1 ,t2;
 				var result1 = [];
@@ -354,41 +355,72 @@ server.get('/api/v1/stat', function (req, res, next) {
 			}
 			type_callback(null, {name: key_each, value: result});
 		})
-		}, function(type_err, type_result){
+		}, function(type_err, type_result) {
 			// callback function of master-async
 			var final_result = _.flatten(type_result);
-			var dom;
-			var domain 	= [];
-			var tmp 	= [];
-			winston.log('debug', 'type_result', totali);
-			// async.each(type_result, function(dom, callback){
-			// 	// code
-			// 	var run = 0;
-			// 	async.each(dom, function(type, cb) {
-			// 		// winston.log("debug", "run: ", run);
-			// 		run ++;
-			// 		// winston.log("debug", "type", type);
-			// 		if ( (run%2) == 1 ) {}
-			// 	});
-			// 	callback();
-			// }, function (err) {
-			// 	// calback
-			// });
-			Object.keys(type_result).forEach(function(kl1){
-				var valDom 		= type_result[kl1]['value'];
-				var totalByName = [];
-				// winston.log('debug', dom['name']);
+			var ddata = {}; tdata = [];
+			var t1 = {}, t2 = {};
+			// winston.log('debug', '<==========totali==========>', totali);
+			// winston.log('debug', '<==========totalOfTotali==========>', totalOfTotali);
+			Object.keys(totalOfTotali).forEach(function(kl1) {
+				var valDom 	= totalOfTotali[kl1]['value'];
+				var nameDom = totalOfTotali[kl1]['name'];
+				// winston.log('debug', '<====================>', totalOfTotali[kl1]['value']);
 				Object.keys(valDom).forEach(function(kl2){
-					var valTyp = valDom[kl2]['value'];
-					// winston.log('debug', type_result[kl1]['name']);
-					// winston.log('debug', typ['value']);
-					Object.keys(valTyp).forEach(function(kl3){
-						// winston.log('debug', valTyp[kl3]);
+					var valTyp = valDom[kl2];
+					Object.keys(valTyp).forEach(function(kk){
+						// winston.log('debug', type_result[kl1]['name']);
+						// winston.log('debug', '<====================>', valTyp);
+						var ll = kk.split('|');
+						var tt = ll[0];
+						var dd = ll[1];
+						if(/body_bytes_sent/.test(tt)) {
+							if(type_traffic_ps) {
+								if(!ddata['traffic_ps']) ddata['traffic_ps'] = [];
+								ddata['traffic_ps'].push({name: dd, value: bw2traf(valTyp[kk],unit)});
+							} else {
+								if(!ddata[tt]) ddata[tt] = [];
+								ddata[tt].push({name: dd, value: valTyp[kk]});
+							}
+						}
+						else if(/speed_request/.test(tt)) {
+							t1[dd]  = valTyp[kk];
+						}
+						else if(/request_count_2xx/.test(tt)) {
+							t2[dd]  = valTyp[kk];
+						} else {
+							if(!ddata[tt]) ddata[tt] = [];
+							ddata[tt].push({name: dd, value: valTyp[kk]});
+						}
 					})
 				})
-
-				// total.push({name: dom['name'], value: dom['value']});
+				tdata.push({name: nameDom, value: ddata});
+				// winston.log('debug', '<===========ddata=========>', ddata);
 			})
+			// winston.log('debug', '<===========ddata=========>', ddata);
+			// winston.log('debug', '<================================>');
+			// winston.log('debug', '<===========tdata=========>', tdata);
+			async.each(tdata, function(data, callback) {
+				// winston.log('debug', '<===========data=========>', data['value']);
+				async.each( data, function(d, cb) {
+					winston.log('debug', '<===========data=========>', d['name']);
+				}, function(e){})
+			}, function(err){});
+			Object.keys(tdata).forEach(function(kk) {
+				// winston.log('debug', '<===========tdata=========>', tdata[kk]['value']);
+				Object.keys(tdata).forEach(function(kk) {
+					//
+				})
+				total.push({type: kk, value: ddata[kk]});
+			})
+			if(type_avg_speed) {
+				var tt2 = [];
+				Object.keys(t1).forEach(function(kk){
+					var vva = t2[kk] ? t1[kk] / t2[kk] : 0;
+					tt2.push({name: kk, value: vva});
+				})
+				total.push({type: 'avg_speed', value: tt2});
+			}
 
 			cache.set(cache_total_key, JSON.stringify({data: final_result, total: total}), 30*1000);
 			res.send({status: true, unit: unit, data: final_result, total: total});
