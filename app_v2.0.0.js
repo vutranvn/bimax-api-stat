@@ -6,16 +6,14 @@ var async 	= require('async');
 var _  		= require('underscore');
 var server 	= restify.createServer({
 	name: 'myapp',
-	version: '1.2.0'
+	version: '2.0.0'
 });
-var groupArray 	= require('group-array');
 var winston 	= require('winston');
 winston.level 	= 'debug';
 winston.add(winston.transports.File, { filename: '/var/log/app.log' });
 
 var NodeCache 	= require( "node-cache" );
 var cache 		= new NodeCache();
-
 
 var rclient = redis.createClient(
 	// "/tmp/redis_counters.sock"
@@ -197,9 +195,9 @@ server.get('/api/v1/stat', function (req, res, next) {
 	// 	res.send({status: true, unit: unit, data: vv.data, total: vv.total});
 	// 	return;
 	// }
-	var from,to,
-	format = "YYYYMMDDHHmm";
-	switch(period) {
+	var from,to;
+	var format = "YYYYMMDDHHmm";
+	switch (period) {
 		case "range":
 			var date_range = date.split(",");
 			if(date_range[0])
@@ -222,6 +220,7 @@ server.get('/api/v1/stat', function (req, res, next) {
 			}
 			from.hour(0).minute(0).second(0);
 	}
+	winston.log("debug", from, to);
 	var dd 		= from.clone();//.add(1, unit);
 	var keys 	= [];
 	var keys_origin 	= [];
@@ -403,7 +402,7 @@ server.get('/api/v1/stat', function (req, res, next) {
 			async.each(tdata, function(data, callback) {
 				// winston.log('debug', '<===========data=========>', data['value']);
 				async.each( data, function(d, cb) {
-					winston.log('debug', '<===========data=========>', d['name']);
+					// winston.log('debug', '<===========data=========>', d['name']);
 				}, function(e){})
 			}, function(err){});
 			Object.keys(tdata).forEach(function(kk) {
